@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type fatal struct {
@@ -46,16 +45,26 @@ func Handler() {
 	}
 }
 
-// print a usage message and exit
-func Usage(message string, args ...interface{}) {
-	// display the version and exit if the version flag was specified.
-	programName := filepath.Base(os.Args[0])
-	programName = strings.TrimSuffix(programName, filepath.Ext(programName))
-	usageMessage := fmt.Sprintf("Use %s -h to show usage", programName)
+// print a message to stderr and exit wit error status
+func Message(message string, args ...interface{}) {
 
-	if message != "" {
-		fmt.Fprintf(os.Stderr, message, args...)
+	m := "failed"
+
+	// if a blank message print a simple usage message
+	if message == "" {
+
+		// tidy up the program name
+		programName := filepath.Base(os.Args[0])
+
+		m = fmt.Sprintf("Use %s -h to show usage", programName)
+	} else {
+
+		// user supplied message
+		m = fmt.Sprintf(message, args...)
 	}
-	fmt.Fprintln(os.Stderr, usageMessage)
+
+	// print to stderr with final '\n'
+	fmt.Fprintln(os.Stderr, m)
+
 	Exit(1)
 }
